@@ -4,41 +4,40 @@ import java.util.*;
 
 public class Industry {
 
-    private List<Account> accounts;
-    private Set<Long> accountNumbers;
-    private final int MII;
+    private final List<Account> accounts;
+    private final Set<String> accountNumbers;
     private final int IIN;
 
     public Industry() {
         this.accounts = new ArrayList<>();
         this.accountNumbers = new HashSet<>();
-        this.MII = 4;
         this.IIN = 400000;
     }
 
     public void createAccount() {
-        long accountNumber;
+        String accountNumber;
         do {
-            accountNumber = (long) ((Math.random() + 1) * 100000000);
+            Random r = new Random();
+            accountNumber = String.format("%09d",  r.nextInt( 1000000000));
         } while (accountNumbers.contains(accountNumber));
         accountNumbers.add(accountNumber);
-        StringBuilder cardNumber = new StringBuilder();
-        cardNumber.append(this.IIN);
-        cardNumber.append(accountNumber);
-        cardNumber.append(8);
-        Account newCard = new Account(Long.parseLong(cardNumber.toString()));
+        String cardNumberExceptLastDigit = this.IIN +
+                accountNumber;
+        String cardNumber = this.IIN +
+                accountNumber +
+                checkLuhn(cardNumberExceptLastDigit);
+        Account newCard = new Account(cardNumber);
         accounts.add(newCard);
     }
 
     public Account getAccount(java.util.Scanner scanner) {
         System.out.println("Enter your card number:");
-        long accountNumber = scanner.nextLong();
-        scanner.nextLine();
+        String accountNumber = scanner.nextLine();
         System.out.println("enter your PIN:");
-        int pin = scanner.nextInt();
+        String pin = scanner.nextLine();
         if (isAccount(accountNumber, pin)) {
             for (Account account : accounts) {
-                if (account.getCreditCardNumber() == accountNumber) {
+                if (accountNumber.equals(account.getCreditCardNumber())) {
                     System.out.println("You have successfully logged in!\n");
                     return accounts.get(accounts.indexOf(account));
                 }
@@ -49,21 +48,44 @@ public class Industry {
         return null;
     }
 
-    private boolean isAccount(long accountNumber, int pin) {
+    private boolean isAccount(String accountNumber, String pin) {
         boolean accountnr = false;
         boolean pinnr = false;
         for (Account account : accounts) {
-            if (account.getCreditCardNumber() == accountNumber) {
+            if (accountNumber.equals(account.getCreditCardNumber())) {
                 accountnr = true;
-                if (account.getPin() == pin) {
+                if (pin.equals(account.getPin())) {
                     pinnr = true;
                 }
             }
         }
-        if (accountnr && pinnr) {
-            return true;
-        } else {
-            return false;
+        return accountnr && pinnr;
+    }
+
+    private String checkLuhn(String accountNumber) {
+        char[] numbers = accountNumber.toCharArray();
+        int [] numbersToInt = new int[numbers.length];
+        for (int i = 0; i < numbers.length; i ++) {
+            numbersToInt[i] = Character.getNumericValue(numbers[i]);
         }
+        int[] temp = new int[accountNumber.length()];
+        for (int i = 0; i < numbersToInt.length; i++) {
+            if ((i + 1) % 2 != 0) {
+                if (numbersToInt[i] * 2 > 9) {
+                    temp [i] = numbersToInt[i] * 2 - 9;
+                } else {
+                    temp [i] = numbersToInt[i] * 2;
+                }
+            } else {
+                temp[i] = numbersToInt[i];
+            }
+        }
+        int sum = 0;
+        for (int i : temp) {
+            sum += i;
+        } if (sum % 10 == 0) {
+            return "0";
+        }
+        return String.valueOf(10 - (sum % 10));
     }
 }
