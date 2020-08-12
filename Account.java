@@ -1,31 +1,34 @@
 package banking;
 
+import java.util.Random;
+
 public class Account {
 
-    private final int pin;
-    private final long creditCardNumber;
+    private final String pin;
+    private final String creditCardNumber;
     private double balance;
 
-    public Account(long accountNumber) {
-        this.pin = (int) ((Math.random() +1) * 1000);
+    public Account(String accountNumber) {
+        Random r = new Random();
+        this.pin = String.format("%04d",  r.nextInt( 10000));
         this.creditCardNumber = accountNumber;
         this.balance = 0.0;
         System.out.println("\nYour card has been created\n" +
                 "Your card number:\n" +
                 this.creditCardNumber +
                 "\nYour card PIN:\n" +
-                + this.pin + "\n");
+                this.pin + "\n");
     }
 
     private void getBalance() {
         System.out.println("\nBalance: " + this.balance);
     }
 
-    public long getCreditCardNumber() {
+    public String getCreditCardNumber() {
         return creditCardNumber;
     }
 
-    public int getPin() {
+    public String getPin() {
         return pin;
     }
 
