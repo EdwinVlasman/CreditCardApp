@@ -4,6 +4,7 @@ import java.util.Random;
 
 public class Account {
 
+    private int id = 0;
     private final String pin;
     private final String creditCardNumber;
     private double balance;
@@ -18,6 +19,18 @@ public class Account {
                 this.creditCardNumber +
                 "\nYour card PIN:\n" +
                 this.pin + "\n");
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public double getSaldo() {
+        return balance;
     }
 
     private void getBalance() {
