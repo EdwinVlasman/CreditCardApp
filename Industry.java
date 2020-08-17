@@ -1,9 +1,15 @@
 package banking;
 
+import org.sqlite.SQLiteDataSource;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 
 public class Industry {
 
+    private String databaseURL;
     private final List<Account> accounts;
     private final Set<String> accountNumbers;
     private final int IIN;
@@ -12,6 +18,10 @@ public class Industry {
         this.accounts = new ArrayList<>();
         this.accountNumbers = new HashSet<>();
         this.IIN = 400000;
+    }
+
+    public void setDatabaseURL(String databaseURL) {
+        this.databaseURL = databaseURL;
     }
 
     public void createAccount() {
@@ -28,6 +38,27 @@ public class Industry {
                 checkLuhn(cardNumberExceptLastDigit);
         Account newCard = new Account(cardNumber);
         accounts.add(newCard);
+        newCard.setId(this.accounts.size());
+
+        SQLiteDataSource dataSource = new SQLiteDataSource();
+        dataSource.setUrl(databaseURL);
+
+        try (Connection con = dataSource.getConnection()) {
+            // Statement creation
+            try (Statement statement = con.createStatement()) {
+                // Statement execution
+                statement.executeUpdate("INSERT INTO card VALUES " +
+                        "(" + newCard.getId() + "," +
+                        newCard.getCreditCardNumber() + "," +
+                        newCard.getPin() + "," +
+                        newCard.getSaldo() + ")"
+                );
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public Account getAccount(java.util.Scanner scanner) {
