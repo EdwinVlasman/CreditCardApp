@@ -1,4 +1,4 @@
-package banking;
+package CreditCardCompany;
 
 import org.sqlite.SQLiteDataSource;
 
@@ -9,43 +9,48 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        //Creating or opening database from commandline argument
-        String url = "jdbc:sqlite:" + args[1];
-        System.out.println(url);
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Please enter company name:");
+        String companyName = scanner.nextLine().toLowerCase();
+        System.out.println("Please enter company IIN:");
+        int IIN = scanner.nextInt();
+        scanner.nextLine();
+        Company company = new Company(IIN, companyName);
+        //creating or opening database
+        String url = "jdbc:sqlite:P:\\" + company.getCompanyName() + ".s3db";
+        company.setDatabaseURL(url);
+        Account account;
+
         SQLiteDataSource dataSource = new SQLiteDataSource();
         dataSource.setUrl(url);
-
+        // create database to store credit card data or open database if it already exists
         try (Connection con = dataSource.getConnection()) {
-            // Statement creation
             try (Statement statement = con.createStatement()) {
-                // Statement execution
                 statement.executeUpdate("CREATE TABLE IF not EXISTS card(" +
-                        "id INTEGER PRIMARY KEY," +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                         "number TEXT NOT NULL," +
                         "pin TEXT NOT NULL," +
-                        "balance INTEGER DEFAULT 0)");
+                        "balance DECIMAL(8,2) DEFAULT 0)");
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        Scanner scanner = new Scanner(System.in);
-        Industry bank = new Industry();
-        bank.setDatabaseURL(url);
-        Account account;
+        // while loop for company options
         while (true) {
             printMenu();
             int choice = scanner.nextInt();
             scanner.nextLine();
             switch (choice) {
                 case 1:
-                    bank.createAccount();
+                    company.createAccount();
                     break;
                 case 2:
-                    account = bank.getAccount(scanner);
+                    account = company.getAccount(scanner);
                     if (account != null) {
-                        choice = account.accountMenu(scanner);
+                        choice = account.accountMenu(scanner, dataSource);
                     }
                     break;
             }
